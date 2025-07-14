@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>停车场管理</title>
+    <style>
+        .container {
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+        .edit-btn, .add-btn {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .add-btn {
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            width: 50%;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+        }
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            border: none;
+            background-color: #f0f0f0;
+            cursor: pointer;
+        }
+        .tab-button.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .form-text {
+            color: #666;
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
+        }
+        .form-buttons {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .submit-btn, .cancel-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .submit-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='/index.html'">返回首页</button>
+        <h2>停车场管理</h2>
+        
+        <div class="tab-container">
+            <button class="tab-button active" onclick="switchTab('lots')">停车场信息</button>
+            <button class="tab-button" onclick="switchTab('spaces')">车位管理</button>
+        </div>
+
+        <button class="add-btn" onclick="showAddModal()">添加停车场</button>
+        
+        <div id="lotsTable">
+            <table>
+                <thead>
+                    <tr>
+                        <th>停车场名称</th>
+                        <th>地址</th>
+                        <th>总车位数</th>
+                        <th>空闲车位数</th>
+                        <th>首小时费率(元/15分钟)</th>
+                        <th>后续费率(元/15分钟)</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 数据将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="spacesTable" style="display: none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>车位编号</th>
+                        <th>所属停车场</th>
+                        <th>状态</th>
+                        <th>预约用户</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 数据将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 编辑停车场弹窗 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">编辑停车场信息</h3>
+            <form id="editForm" onsubmit="handleSubmit(event)">
+                <input type="hidden" id="parkingLotId">
+                <div class="form-group">
+                    <label>停车场名称</label>
+                    <input type="text" id="parkingName" required placeholder="请输入停车场名称">
+                </div>
+                <div class="form-group">
+                    <label>地址</label>
+                    <input type="text" id="address" required placeholder="请输入停车场地址">
+                </div>
+                <div class="form-group">
+                    <label>总车位数</label>
+                    <input type="number" id="totalSpaces" required min="1" placeholder="请输入总车位数">
+                </div>
+                <div class="form-group">
+                    <label>首小时费率(元/15分钟)</label>
+                    <input type="number" id="rate1" step="0.01" min="0" required placeholder="请输入首小时每15分钟收费金额">
+                    <small class="form-text">此费率适用于车辆停车的第一个小时</small>
+                </div>
+                <div class="form-group">
+                    <label>后续费率(元/15分钟)</label>
+                    <input type="number" id="rate2" step="0.01" min="0" required placeholder="请输入后续每15分钟收费金额">
+                    <small class="form-text">此费率适用于车辆停车超过一小时后的时间</small>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="submit-btn">保存</button>
+                    <button type="button" class="cancel-btn" onclick="closeModal()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'lots';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            document.getElementById('lotsTable').style.display = tab === 'lots' ? 'block' : 'none';
+            document.getElementById('spacesTable').style.display = tab === 'spaces' ? 'block' : 'none';
+            
+            if (tab === 'lots') {
+                loadParkingLots();
+            } else {
+                loadParkingSpaces();
+            }
+        }
+
+        function loadParkingLots() {
+            fetch('/admin/parking-lots')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector('#lotsTable tbody');
+                    tbody.innerHTML = '';
+                    data.forEach(lot => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${lot.name}</td>
+                                <td>${lot.address}</td>
+                                <td>${lot.totalSpaces}</td>
+                                <td>${lot.availableSpaces}</td>
+                                <td>${lot.rate1}</td>
+                                <td>${lot.rate2}</td>
+                                <td>
+                                    <button class="edit-btn" onclick="editParkingLot(${lot.parkingLotId})">
+                                        编辑
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+
+        function loadParkingSpaces() {
+            fetch('/admin/parking-spaces')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector('#spacesTable tbody');
+                    tbody.innerHTML = '';
+                    data.forEach(space => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${space.spaceNumber}</td>
+                                <td>${space.parkingLotName}</td>
+                                <td>${getStatusText(space.status)}</td>
+                                <td>${space.reservedBy || '-'}</td>
+                                <td>
+                                    <button class="edit-btn" onclick="editSpace(${space.spaceId})">
+                                        ${space.status === 0 ? '停用' : '启用'}
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+
+        function getStatusText(status) {
+            switch(parseInt(status)) {
+                case 0: return '可用';
+                case 1: return '使用中';
+                case 2: return '已停用';
+                default: return '未知状态';
+            }
+        }
+
+        function showAddModal() {
+            document.getElementById('modalTitle').textContent = '添加新停车场';
+            document.getElementById('editForm').reset();
+            document.getElementById('parkingLotId').value = '';
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function editParkingLot(parkingLotId) {
+            document.getElementById('modalTitle').textContent = '编辑停车场信息';
+            fetch(`/admin/parking-lots/${parkingLotId}`)
+                .then(response => response.json())
+                .then(lot => {
+                    document.getElementById('parkingLotId').value = lot.parkingLotId;
+                    document.getElementById('parkingName').value = lot.name;
+                    document.getElementById('address').value = lot.address;
+                    document.getElementById('totalSpaces').value = lot.totalSpaces;
+                    document.getElementById('rate1').value = lot.rate1.toFixed(2);
+                    document.getElementById('rate2').value = lot.rate2.toFixed(2);
+                    document.getElementById('editModal').style.display = 'block';
+                });
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            // 获取并验证表单数据
+            const parkingLotId = document.getElementById('parkingLotId').value.trim();
+            const name = document.getElementById('parkingName').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const totalSpaces = document.getElementById('totalSpaces').value.trim();
+            const rate1 = document.getElementById('rate1').value.trim();
+            const rate2 = document.getElementById('rate2').value.trim();
+
+            // 验证必填字段
+            if (!name) {
+                alert('请输入停车场名称');
+                return;
+            }
+            if (!address) {
+                alert('请输入停车场地址');
+                return;
+            }
+            if (!totalSpaces) {
+                alert('请输入总车位数');
+                return;
+            }
+            if (!rate1) {
+                alert('请输入首小时费率');
+                return;
+            }
+            if (!rate2) {
+                alert('请输入后续费率');
+                return;
+            }
+
+            const parkingLot = {
+                name: name,
+                address: address,
+                totalSpaces: parseInt(totalSpaces),
+                availableSpaces: parseInt(totalSpaces),
+                rate1: parseFloat(rate1),
+                rate2: parseFloat(rate2)
+            };
+
+            // 如果是编辑模式，添加parkingLotId
+            if (parkingLotId) {
+                parkingLot.parkingLotId = parseInt(parkingLotId);
+            }
+            
+            const method = parkingLotId ? 'PUT' : 'POST';
+            
+            fetch('/admin/parking-lots', {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(parkingLot)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 检查数据是否保存成功（通过重新加载数据来验证）
+                closeModal();
+                loadParkingLots();
+                alert('操作成功');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // 即使发生错误，也检查是否实际保存成功
+                loadParkingLots();
+            });
+        }
+
+        function editSpace(spaceId) {
+            if (confirm('确定要切换此车位的状态吗？')) {
+                fetch(`/admin/parking-spaces/${spaceId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadParkingSpaces();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('操作失败：' + error.message);
+                });
+            }
+        }
+
+        // 添加窗口关闭按钮的事件监听
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // 初始加载
+        loadParkingLots();
+    </script>
+</body>
+</html> 

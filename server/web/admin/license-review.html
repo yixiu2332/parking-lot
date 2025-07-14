@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>车牌审核</title>
+    <style>
+        .container {
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+        .back-btn {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .action-btn {
+            padding: 5px 10px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .approve-btn {
+            background-color: #28a745;
+        }
+        .reject-btn {
+            background-color: #dc3545;
+        }
+        .status-pending {
+            color: #ffc107;
+        }
+        .status-approved {
+            color: #28a745;
+        }
+        .status-rejected {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='/index.html'">返回首页</button>
+        <h2>车牌审核</h2>
+        <table id="reviewTable">
+            <thead>
+                <tr>
+                    <th>用户名</th>
+                    <th>车牌号</th>
+                    <th>提交时间</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 数据将通过JavaScript动态加载 -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function loadReviews() {
+            fetch('/admin/license-reviews')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector('#reviewTable tbody');
+                    tbody.innerHTML = '';
+                    data.forEach(review => {
+                        const statusClass = getStatusClass(review.status);
+                        const statusText = getStatusText(review.status);
+                        const actions = review.status === 0 ? `
+                            <button class="action-btn approve-btn" onclick="handleReview(${review.reviewId}, 1)">通过</button>
+                            <button class="action-btn reject-btn" onclick="handleReview(${review.reviewId}, 2)">拒绝</button>
+                        ` : '已处理';
+                        
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${review.username}</td>
+                                <td>${review.licensePlate}</td>
+                                <td>${new Date(review.submittedAt).toLocaleString()}</td>
+                                <td class="${statusClass}">${statusText}</td>
+                                <td>${actions}</td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 0: return 'status-pending';
+                case 1: return 'status-approved';
+                case 2: return 'status-rejected';
+                default: return '';
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 0: return '待审核';
+                case 1: return '已通过';
+                case 2: return '已拒绝';
+                default: return '未知';
+            }
+        }
+
+        function handleReview(reviewId, status) {
+            fetch('/admin/license-reviews', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `reviewId=${reviewId}&status=${status}`
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if(data.success) {
+                    alert(data.message); // 显示成功消息
+                    loadReviews(); // 重新加载数据
+                } else {
+                    alert('操作失败：' + (data.message || '未知错误'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('系统错误：' + error.message);
+            });
+        }
+
+        // 初始加载
+        loadReviews();
+    </script>
+</body>
+</html> 

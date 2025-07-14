@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>智能停车管理系统 - 管理员后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: #fff;
+            padding-top: 20px;
+        }
+        
+        .logo {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #4f5962;
+        }
+        
+        .menu {
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .menu-item:hover {
+            background-color: #4f5962;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .welcome-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .function-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .function-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .function-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .function-card h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">
+                <h2>管理员后台</h2>
+            </div>
+            <div class="menu">
+                <div class="menu-item" onclick="navigate('report')">系统报表</div>
+                <div class="menu-item" onclick="navigate('parking')">停车场管理</div>
+                <div class="menu-item" onclick="navigate('license')">车牌审核</div>
+                <div class="menu-item" onclick="navigate('users')">用户管理</div>
+                <div class="menu-item" onclick="navigate('history')">历史记录查询</div>
+                <div class="menu-item" onclick="logout()">退出登录</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-section">
+                <h2>欢迎使用智能停车管理系统</h2>
+                <p>请选择以下功能进行操作</p>
+            </div>
+            
+            <div class="function-grid">
+                <div class="function-card" onclick="navigate('report')">
+                    <h3>系统报表</h3>
+                    <p>查看系统收入统计</p>
+                </div>
+                <div class="function-card" onclick="navigate('parking')">
+                    <h3>停车场管理</h3>
+                    <p>管理停车场和车位</p>
+                </div>
+                <div class="function-card" onclick="navigate('license')">
+                    <h3>车牌审核</h3>
+                    <p>审核用户车牌信息</p>
+                </div>
+                <div class="function-card" onclick="navigate('users')">
+                    <h3>用户管理</h3>
+                    <p>管理系统用户</p>
+                </div>
+                <div class="function-card" onclick="navigate('history')">
+                    <h3>历史记录</h3>
+                    <p>查询用户停车记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 检查登录状态
+        fetch('/admin/check-session')
+            .then(response => {
+                if (!response.ok) {
+                    window.location.href = '/login.html';
+                }
+            })
+            .catch(() => {
+                window.location.href = '/login.html';
+            });
+            
+        function navigate(page) {
+            switch(page) {
+                case 'report':
+                    window.location.href = '/admin/report.html';  // 检查这个路径
+                    break;
+                case 'parking':
+                    window.location.href = '/admin/parking-manage.html';  // 停车场管理（包含信息查看和修改）
+                    break;
+                case 'license':
+                    window.location.href = '/admin/license-review.html';  // 车牌审核
+                    break;
+                case 'users':
+                    window.location.href = '/admin/user-manage.html';  // 用户管理
+                    break;
+                case 'history':
+                    window.location.href = '/admin/parking-history.html';  // 停车历史记录
+                    break;
+            }
+        }
+
+        function logout() {
+            if(confirm('确定要退出登录吗？')) {
+                fetch('/admin/logout', { method: 'POST' })
+                    .then(() => {
+                        window.location.href = '/login.html';
+                    })
+                    .catch(error => {
+                        console.error('退出登录失败:', error);
+                    });
+            }
+        }
+    </script>
+</body>
+</html> 

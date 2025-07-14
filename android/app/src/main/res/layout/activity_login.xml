@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <TextView
+            android:id="@+id/tv_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="登录"
+            android:textSize="@dimen/text_size_xlarge"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageButton
+            android:id="@+id/ibt_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="20dp"
+            android:background="@drawable/icon_back"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:contentDescription="返回按钮"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ImageView
+        android:id="@+id/iv_icon"
+        android:layout_marginTop="10dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/icon_stoplot"
+        android:scaleType="centerInside"
+        android:layout_gravity="center"
+        android:contentDescription="App图标"
+        />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="20dp"
+        android:padding="5dp">
+
+        <RadioGroup
+            android:id="@+id/rg_switch"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <RadioButton
+                android:id="@+id/rb_pwd"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:button="@null"
+                android:background="@drawable/selector_radio_bg"
+                android:gravity="center"
+                android:text="密码登录"
+                android:textSize="@dimen/text_size_large"
+                android:checked="true"
+                 />
+
+            <RadioButton
+                android:background="@drawable/selector_radio_bg"
+                android:id="@+id/rb_captcha"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:button="@null"
+                android:gravity="center"
+                android:text="验证码登录"
+                android:textSize="@dimen/text_size_large"
+                />
+
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/et_top"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:hint="请输入账号"
+            android:maxLength="20"
+            android:inputType="text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rg_switch" />
+
+        <EditText
+            android:id="@+id/et_down"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:maxLength="20"
+            android:hint="请输入密码"
+            android:inputType="textPassword"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/et_top" />
+
+        <TextView
+            android:id="@+id/tv_get"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:padding="5dp"
+            android:text="忘记密码"
+            android:textColor="@color/violet"
+            android:textSize="@dimen/text_size_normal"
+            app:layout_constraintEnd_toEndOf="@+id/et_down"
+            app:layout_constraintTop_toTopOf="@+id/et_down" />
+
+        <TextView
+            android:id="@+id/tv_register"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:padding="5dp"
+            android:text="注册账号"
+            android:textColor="@color/violet"
+            android:textSize="@dimen/text_size_normal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:layout_marginTop="10dp"
+        android:id="@+id/bt_login"
+        android:layout_width="250dp"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content"
+        android:text="登录"
+        android:textSize="@dimen/text_size_large"
+        />
+
+    <ProgressBar
+        android:id="@+id/login_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:visibility="gone"
+        android:indeterminate="true" />
+
+    <TextView
+        android:id="@+id/tv_manager"
+        android:layout_marginTop="100sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="管理员登录>>>"
+        android:visibility="gone"
+        android:textSize="@dimen/text_size_normal"
+        android:textColor="@color/violet"
+        android:gravity="center"
+        />
+</LinearLayout>

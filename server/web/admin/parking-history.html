@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>停车历史记录</title>
+    <style>
+        .container {
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+        .back-btn {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .search-box {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .search-box input {
+            padding: 8px;
+            width: 200px;
+        }
+        .search-box button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .date-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .paid-status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .unpaid {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .pagination button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .pagination button.active {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='/index.html'">返回首页</button>
+        <h2>停车历史记录</h2>
+        
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="输入用户名或车牌号搜索">
+            <div class="date-range">
+                <span>时间范围：</span>
+                <input type="date" id="startDate">
+                <span>至</span>
+                <input type="date" id="endDate">
+            </div>
+            <button onclick="searchRecords()">搜索</button>
+        </div>
+
+        <table id="historyTable">
+            <thead>
+                <tr>
+                    <th>用户名</th>
+                    <th>车牌号</th>
+                    <th>停车位编号</th>
+                    <th>入场时间</th>
+                    <th>离场时间</th>
+                    <th>停车费用</th>
+                    <th>支付状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 数据将通过JavaScript动态加载 -->
+            </tbody>
+        </table>
+
+        <div class="pagination" id="pagination">
+            <!-- 分页按钮将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const pageSize = 10;
+
+        function loadRecords(page = 1, searchTerm = '', startDate = '', endDate = '') {
+            let url = `/admin/parking-records?page=${page}&size=${pageSize}`;
+            if (searchTerm) {
+                url += `&search=${encodeURIComponent(searchTerm)}`;
+            }
+            if (startDate) {
+                url += `&startDate=${startDate}`;
+            }
+            if (endDate) {
+                url += `&endDate=${endDate}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector('#historyTable tbody');
+                    tbody.innerHTML = '';
+                    data.records.forEach(record => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${record.username}</td>
+                                <td>${record.licensePlate}</td>
+                                <td>${record.spaceNumber}</td>
+                                <td>${new Date(record.entryTime).toLocaleString()}</td>
+                                <td>${record.exitTime ? new Date(record.exitTime).toLocaleString() : '未离场'}</td>
+                                <td>${record.cost}元</td>
+                                <td>
+                                    <span class="paid-status ${record.paid ? 'paid' : 'unpaid'}">
+                                        ${record.paid ? '已支付' : '未支付'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    // 更新分页
+                    updatePagination(data.totalPages, page);
+                });
+        }
+
+        function updatePagination(totalPages, currentPage) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            // 上一页按钮
+            if (currentPage > 1) {
+                pagination.innerHTML += `
+                    <button onclick="loadRecords(${currentPage - 1}, getSearchParams())">上一页</button>
+                `;
+            }
+
+            // 页码按钮
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.innerHTML += `
+                    <button class="${i === currentPage ? 'active' : ''}" 
+                            onclick="loadRecords(${i}, getSearchParams())">${i}</button>
+                `;
+            }
+
+            // 下一页按钮
+            if (currentPage < totalPages) {
+                pagination.innerHTML += `
+                    <button onclick="loadRecords(${currentPage + 1}, getSearchParams())">下一页</button>
+                `;
+            }
+        }
+
+        function getSearchParams() {
+            return {
+                searchTerm: document.getElementById('searchInput').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value
+            };
+        }
+
+        function searchRecords() {
+            const params = getSearchParams();
+            loadRecords(1, params.searchTerm, params.startDate, params.endDate);
+        }
+
+        // 设置日期选择器的默认值为当前月份的起始日期和结束日期
+        function setDefaultDates() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+            document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
+        }
+
+        // 初始化
+        setDefaultDates();
+        loadRecords();
+    </script>
+</body>
+</html> 

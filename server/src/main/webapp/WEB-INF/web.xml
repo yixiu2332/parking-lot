@@ -1,0 +1,13 @@
+<servlet>
+    <servlet-name>ReportServlet</servlet-name>
+    <servlet-class>com.zyf.servlets.ReportServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+    <servlet-name>ReportServlet</servlet-name>
+    <url-pattern>/admin/report</url-pattern>
+</servlet-mapping>
+
+<!-- Socket服务器初始化监听器 -->
+<listener>
+    <listener-class>com.zyf.message.SocketServerInitializer</listener-class>
+</listener> 
